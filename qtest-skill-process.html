@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>qTest Converter and Review Processes</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --ink: #172033;
+      --muted: #5c667a;
+      --line: #d9e1ef;
+      --primary: #335cff;
+      --primary-dark: #1f3fc2;
+      --accent: #18a999;
+      --warning: #b7791f;
+      --danger: #c53030;
+      --shadow: 0 18px 48px rgba(23, 32, 51, 0.12);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(51, 92, 255, 0.12), transparent 34rem),
+        radial-gradient(circle at bottom right, rgba(24, 169, 153, 0.12), transparent 32rem),
+        var(--bg);
+      color: var(--ink);
+      line-height: 1.55;
+    }
+
+    header {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 56px 24px 24px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .hero-card,
+    .panel,
+    .output-card {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid rgba(217, 225, 239, 0.9);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-card {
+      padding: 34px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      color: var(--primary-dark);
+      font-size: 0.84rem;
+      font-weight: 750;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(2.25rem, 5vw, 4.4rem);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+    }
+
+    .lead {
+      max-width: 720px;
+      color: var(--muted);
+      font-size: 1.08rem;
+      margin: 0 0 26px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: #fff;
+      color: #35405a;
+      font-size: 0.88rem;
+      font-weight: 650;
+    }
+
+    .principle-card {
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .principle-card h2,
+    .panel h2,
+    .output-card h2 {
+      margin: 0;
+      letter-spacing: -0.025em;
+    }
+
+    .rule-list {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .rule-list li {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr);
+      gap: 10px;
+      color: var(--muted);
+    }
+
+    .rule-list strong {
+      color: var(--ink);
+    }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px 24px 64px;
+    }
+
+    .section-title {
+      margin: 28px 0 16px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .section-title p {
+      max-width: 660px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .process-switch {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 8px 0 28px;
+    }
+
+    .process-switch a {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: #fff;
+      color: var(--primary-dark);
+      font-weight: 750;
+      text-decoration: none;
+      transition: 160ms ease;
+    }
+
+    .process-switch a:hover {
+      border-color: var(--primary);
+      box-shadow: 0 8px 20px rgba(51, 92, 255, 0.14);
+      transform: translateY(-1px);
+    }
+
+    #converter-process,
+    #review-process {
+      scroll-margin-top: 24px;
+    }
+
+    .process-grid {
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 22px;
+    }
+
+    .steps-nav {
+      display: grid;
+      gap: 12px;
+    }
+
+    .step-button,
+    .review-step-button {
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px;
+      cursor: pointer;
+      transition: 160ms ease;
+      color: var(--ink);
+    }
+
+    .step-button:hover,
+    .step-button.active,
+    .review-step-button:hover,
+    .review-step-button.active {
+      border-color: rgba(51, 92, 255, 0.7);
+      box-shadow: 0 10px 24px rgba(51, 92, 255, 0.14);
+      transform: translateY(-1px);
+    }
+
+    .step-button.active,
+    .review-step-button.active {
+      background: linear-gradient(135deg, #f3f6ff, #ffffff);
+    }
+
+    .step-button span,
+    .review-step-button span {
+      display: block;
+      color: var(--primary-dark);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .step-button strong,
+    .review-step-button strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 1rem;
+    }
+
+    .diagram-card {
+      min-height: 480px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .diagram {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .node,
+    .review-node {
+      min-height: 116px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: #fff;
+      position: relative;
+      transition: 180ms ease;
+    }
+
+    .node.active,
+    .review-node.active {
+      border-color: var(--primary);
+      box-shadow: 0 12px 30px rgba(51, 92, 255, 0.16);
+      transform: translateY(-2px);
+    }
+
+    .node .num,
+    .review-node .num {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      background: #eef2ff;
+      color: var(--primary-dark);
+      font-weight: 850;
+      margin-bottom: 10px;
+    }
+
+    .node h3,
+    .review-node h3 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+    }
+
+    .node p,
+    .review-node p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .review-section {
+      margin-top: 48px;
+    }
+
+    .review-section .review-node .num {
+      background: #e8fbf7;
+      color: #087f72;
+    }
+
+    .review-section .review-node.active,
+    .review-section .review-step-button.active {
+      border-color: var(--accent);
+      box-shadow: 0 12px 30px rgba(24, 169, 153, 0.16);
+      background: linear-gradient(135deg, #effcf9, #ffffff);
+    }
+
+    .severity {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .severity.critical {
+      color: #8f1d1d;
+      background: #fff0f0;
+    }
+
+    .severity.high {
+      color: #8a4b08;
+      background: #fff6e8;
+    }
+
+    .severity.medium {
+      color: #2856a5;
+      background: #edf4ff;
+    }
+
+    .severity.low {
+      color: #28695f;
+      background: #eafaf6;
+    }
+
+    .detail-box {
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, #ffffff, #f8fbff);
+      padding: 22px;
+    }
+
+    .detail-box h3 {
+      margin: 0 0 8px;
+      font-size: 1.5rem;
+      letter-spacing: -0.03em;
+    }
+
+    .detail-box p {
+      color: var(--muted);
+      margin: 0 0 14px;
+    }
+
+    .detail-box ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #36425b;
+    }
+
+    .detail-box li {
+      margin: 7px 0;
+    }
+
+    .output-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      margin-top: 22px;
+    }
+
+    .output-card {
+      padding: 22px;
+    }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      overflow: hidden;
+      border-radius: 12px;
+      font-size: 0.92rem;
+    }
+
+    .mini-table th,
+    .mini-table td {
+      border: 1px solid var(--line);
+      padding: 10px;
+      vertical-align: top;
+      text-align: left;
+    }
+
+    .mini-table th {
+      background: #f1f4fb;
+      color: #303b54;
+    }
+
+    .mini-table td {
+      background: #fff;
+      color: #4a556f;
+    }
+
+    .callout {
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid rgba(183, 121, 31, 0.25);
+      background: #fffaf0;
+      color: #594014;
+      border-radius: 16px;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 9px 13px;
+      cursor: pointer;
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .tab.active {
+      color: #fff;
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+      color: var(--muted);
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .example-output {
+      background: #111827;
+      color: #e5ecff;
+      padding: 18px;
+      border-radius: 14px;
+      overflow-x: auto;
+      font-size: 0.87rem;
+      line-height: 1.5;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      margin: 26px 0 0;
+      font-size: 0.92rem;
+    }
+
+    @media (max-width: 900px) {
+      .hero,
+      .process-grid,
+      .output-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .diagram {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <section class="hero-card">
+        <div class="eyebrow">qTest Converter and Reviewer</div>
+        <h1>Build and review qTest-ready test cases.</h1>
+        <p class="lead">
+          Use the converter process to build structured qTest cases from source material. Use the review process to audit existing qTest exports for complete descriptions, necessary preconditions, executable steps, concrete validations, users, access options, and parameters.
+        </p>
+        <div class="chips">
+          <span class="chip">No invented data</span>
+          <span class="chip">Complete-concept steps</span>
+          <span class="chip">Concrete validation column</span>
+          <span class="chip">Tables for run options</span>
+          <span class="chip">qTest parameter checks</span>
+          <span class="chip">Consolidate or split flows</span>
+          <span class="chip">Jira story aware</span>
+          <span class="chip">Markdown process docs</span>
+          <span class="chip">Use background directories</span>
+          <span class="chip">Review existing exports</span>
+          <span class="chip">Actionable findings</span>
+          <span class="chip">Clarification questions</span>
+        </div>
+      </section>
+
+      <aside class="principle-card hero-card">
+        <h2>Two Companion Processes</h2>
+        <ul class="rule-list">
+          <li><span>1.</span><span><strong>Convert</strong> source material into executable qTest test cases.</span></li>
+          <li><span>2.</span><span><strong>Review</strong> exported cases against the same quality standard.</span></li>
+          <li><span>3.</span><span><strong>Improve</strong> descriptions, preconditions, steps, and validations without inventing data.</span></li>
+          <li><span>4.</span><span><strong>Clarify</strong> gaps that cannot be resolved from the supplied sources.</span></li>
+        </ul>
+      </aside>
+    </div>
+  </header>
+
+  <main>
+    <nav class="process-switch" aria-label="qTest process navigation">
+      <a href="#converter-process">Converter Process</a>
+      <a href="#review-process">Review Export Process</a>
+    </nav>
+
+    <div class="section-title" id="converter-process">
+      <div>
+        <h2>Converter Process</h2>
+        <p>Click each stage to see how the skill reasons from raw test input to qTest-ready output.</p>
+      </div>
+    </div>
+
+    <section class="process-grid">
+      <aside class="panel steps-nav" aria-label="Process stages">
+        <button class="step-button active" data-step="0">
+          <span>Stage 1</span>
+          <strong>Read input and sources</strong>
+        </button>
+        <button class="step-button" data-step="1">
+          <span>Stage 2</span>
+          <strong>Detect source cases</strong>
+        </button>
+        <button class="step-button" data-step="2">
+          <span>Stage 3</span>
+          <strong>Consolidate or split</strong>
+        </button>
+        <button class="step-button" data-step="3">
+          <span>Stage 4</span>
+          <strong>Identify structure</strong>
+        </button>
+        <button class="step-button" data-step="4">
+          <span>Stage 5</span>
+          <strong>Map options and parameters</strong>
+        </button>
+        <button class="step-button" data-step="5">
+          <span>Stage 6</span>
+          <strong>Build steps and clarify</strong>
+        </button>
+      </aside>
+
+      <section class="panel diagram-card">
+        <div class="diagram" id="diagram">
+          <div class="node active" data-node="0">
+            <div class="num">1</div>
+            <h3>Input</h3>
+            <p>Jira stories, background notes, source cases, files, Markdown docs, or directories.</p>
+          </div>
+          <div class="node" data-node="1">
+            <div class="num">2</div>
+            <h3>Source Cases</h3>
+            <p>Detect one or many test cases, flows, and result outputs.</p>
+          </div>
+          <div class="node" data-node="2">
+            <div class="num">3</div>
+            <h3>Grouping</h3>
+            <p>Consolidate related cases or split independent flows.</p>
+          </div>
+          <div class="node" data-node="3">
+            <div class="num">4</div>
+            <h3>qTest Shape</h3>
+            <p>Description, preconditions, users, data, and steps.</p>
+          </div>
+          <div class="node" data-node="4">
+            <div class="num">5</div>
+            <h3>Options</h3>
+            <p>User, setup, access, workflow, and parameter choices stay organized.</p>
+          </div>
+          <div class="node" data-node="5">
+            <div class="num">6</div>
+            <h3>Steps</h3>
+            <p>Complete work, validate results, and ask for gaps.</p>
+          </div>
+        </div>
+
+        <div class="detail-box" id="detailBox">
+          <h3>Read input and background sources</h3>
+          <p>The skill starts by extracting only the facts supplied by the user, including relevant facts from Jira stories, high-level background, Markdown process docs, or a provided background directory. It does not invent login data, statuses, expected messages, test records, URLs, or application behavior.</p>
+          <ul>
+            <li>Capture Jira fields, actors, actions, pages, forms, records, source files, and outcomes.</li>
+            <li>Use Markdown headings, lists, and tables to identify process flow, access options, parameters, and validations.</li>
+            <li>Summarize which background files or source cases informed the output.</li>
+            <li>Separate known facts from assumptions.</li>
+            <li>Mark missing required details as <strong>Needs clarification</strong>.</li>
+          </ul>
+        </div>
+      </section>
+    </section>
+
+    <section class="output-grid">
+      <article class="output-card">
+        <h2>qTest Output Sections</h2>
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Source Analysis</td>
+              <td>Show which source cases or background files informed the qTest draft.</td>
+            </tr>
+            <tr>
+              <td>Source Grouping Decision</td>
+              <td>Explain whether multiple source cases were consolidated into one qTest case or split into separate qTest cases.</td>
+            </tr>
+            <tr>
+              <td>Description</td>
+              <td>Explain the whole test case and the application process being verified.</td>
+            </tr>
+            <tr>
+              <td>Preconditions</td>
+              <td>List required setup, permissions, records, configuration, environment, or workflow state.</td>
+            </tr>
+            <tr>
+              <td>Login / User Details</td>
+              <td>Include every user or role involved, plus known or missing login details.</td>
+            </tr>
+            <tr>
+              <td>Access / Setup Options</td>
+              <td>Show the different ways the test can be run when users, setup steps, or access-management choices vary.</td>
+            </tr>
+            <tr>
+              <td>qTest Parameters</td>
+              <td>List provided parameters and values, where they are used, and whether each parameter/value set checks out.</td>
+            </tr>
+            <tr>
+              <td>Test Data</td>
+              <td>Track provided data values and identify missing data needed to run the test.</td>
+            </tr>
+            <tr>
+              <td>qTest Steps</td>
+              <td>Provide step and validation columns, ready for qTest-style entry.</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+      <article class="output-card">
+        <h2>What Makes a Good Step?</h2>
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Weak Step</th>
+              <th>Better qTest Step</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Click Submit.</td>
+              <td>As the Requester, complete the form review page and submit the request using the provided values.</td>
+            </tr>
+            <tr>
+              <td>Verify success.</td>
+              <td>The request is submitted, a confirmation message appears, and the request status changes to the expected submitted status.</td>
+            </tr>
+            <tr>
+              <td>Approve request.</td>
+              <td>As the Approver, open the submitted request, review all required sections, enter the approval decision, and save the decision.</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+
+    <section class="output-card" style="margin-top: 22px;">
+      <h2>Supported Background Inputs</h2>
+      <table class="mini-table">
+        <thead>
+          <tr>
+            <th>Input Type</th>
+            <th>How the Skill Uses It</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Jira Story</td>
+            <td>Uses title, description, acceptance criteria, comments, labels, components, linked items, and provided attachments to identify qTest title, flow, preconditions, validations, and gaps.</td>
+          </tr>
+          <tr>
+            <td>High-Level Background</td>
+            <td>Uses business context and terminology to organize the application process, while avoiding invented statuses, data, permissions, or expected messages.</td>
+          </tr>
+          <tr>
+            <td>Markdown Process Docs</td>
+            <td>Uses headings, lists, tables, role descriptions, examples, and business rules as source material for workflow steps, access/setup options, parameters, and validations.</td>
+          </tr>
+          <tr>
+            <td>Background Directory</td>
+            <td>Inspects relevant files, records which sources were used, and asks which source is authoritative if documentation conflicts with the Jira story or test input.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="output-card" style="margin-top: 22px;">
+      <h2>Explore the Skill Rules</h2>
+      <div class="tabs" role="tablist" aria-label="Skill rule tabs">
+        <button class="tab active" data-tab="no-data">No Made-Up Data</button>
+        <button class="tab" data-tab="tables">Option Tables</button>
+        <button class="tab" data-tab="parameters">qTest Parameters</button>
+        <button class="tab" data-tab="grouping">Source Grouping</button>
+        <button class="tab" data-tab="background">Background Files</button>
+        <button class="tab" data-tab="validation">Concrete Validation</button>
+        <button class="tab" data-tab="questions">Clarifications</button>
+      </div>
+
+      <div class="tab-content active" id="no-data">
+        <p>The skill uses only what the user provided. Missing information is not guessed. It is either marked as <strong>Needs clarification</strong> in the draft or asked about after the test case.</p>
+      </div>
+      <div class="tab-content" id="tables">
+        <p>When the same test can be run with different users, setup steps, access-management choices, workflow paths, branches, validations, or repeated field values, the skill uses an option table to show those run choices clearly.</p>
+      </div>
+      <div class="tab-content" id="parameters">
+        <p>When qTest parameters and values are provided, the skill checks the draft against them: every used parameter needs provided values, and every provided parameter is either used or called out as provided but not used.</p>
+      </div>
+      <div class="tab-content" id="grouping">
+        <p>When the input contains multiple source test cases, the skill first tries to consolidate related cases into one qTest case using options and parameters. If the flows are independent or incompatible, it splits them into separate qTest cases.</p>
+      </div>
+      <div class="tab-content" id="background">
+        <p>When the user provides Jira stories, high-level background, Markdown process docs, or a directory of background information, the skill uses them as supporting context, records the sources used, and asks for clarification when sources conflict or key details are missing.</p>
+      </div>
+      <div class="tab-content" id="validation">
+        <p>The validation column must prove a real result: a status changed, a record was created, a message appeared, data persisted, a workflow moved forward, or an error was displayed.</p>
+      </div>
+      <div class="tab-content" id="questions">
+        <p>Clarification questions are grouped by type: qTest structure, step process, users/login, test data, validation, or other process. This helps the user answer the exact gaps blocking a better test case.</p>
+      </div>
+    </section>
+
+    <section class="output-card" style="margin-top: 22px;">
+      <h2>Example qTest Skeleton</h2>
+      <pre class="example-output"><code>## Test Case: &lt;clear test case name&gt;
+
+### Source Analysis
+| Source | Relevant Information Used | Notes |
+|---|---|---|
+| Jira Story ABC-123 | Request submission acceptance criteria | Used for title, objective, and expected submission behavior |
+| process/request-workflow.md | Request and approval workflow | Used for process order and role responsibilities |
+| Source Test Case A | Request submission flow | Consolidated as standard submission option |
+| Source Test Case B | Approval flow | Consolidated as approval run option |
+
+### Source Grouping Decision
+Consolidated into one qTest test case because the source cases validate one end-to-end request process and the differences can be represented as user/access options and qTest parameters.
+
+### Description
+&lt;full test purpose and business process&gt;
+
+### Preconditions
+&lt;required setup or Needs clarification&gt;
+
+### Login / User Details
+| User / Role | Purpose | Access | Login Details |
+|---|---|---|---|
+| Requester | Submit request | Needs clarification | Needs clarification |
+| Approver | Approve request | Needs clarification | Needs clarification |
+
+### Access / Setup Options
+| Option | User / Role | Setup Steps | Access Management Option | When to Use |
+|---|---|---|---|---|
+| Standard Submission | Requester | User has requester setup | Standard requester access | Validate normal submission |
+| Approval Run | Approver | User has approval queue setup | Approval access enabled | Validate approval workflow |
+
+### qTest Parameters
+| Parameter | Values Provided | Used In | Parameter Check |
+|---|---|---|---|
+| UserRole | Requester, Approver | Access / Setup Options; Steps 1-3 | Verified |
+| AccountId | Needs clarification | Test Data; Step 1 | Needs clarification |
+
+### qTest Steps
+| Step # | Step | Validation / Expected Result |
+|---:|---|---|
+| 1 | As the Requester, complete the request page using the selected access/setup option and provided test data. | Required fields are accepted and the request is ready for submission. |
+| 2 | Submit the completed request. | The request is created and its submitted status is displayed. |
+| 3 | As the Approver, review and complete the approval task. | The request moves to the expected approved status. |
+
+### Clarifications Needed
+#### qTest Parameters
+- What values should be provided for the AccountId parameter?
+
+#### Validation
+- What exact status should appear after submission?</code></pre>
+      <div class="callout">
+        <strong>Design principle:</strong> the skill should create the best usable draft from the provided input, then clearly show what still needs a human answer.
+      </div>
+    </section>
+
+    <section class="review-section" id="review-process">
+      <div class="section-title">
+        <div>
+          <h2>Review Export Process</h2>
+          <p>Use this process to audit current qTest exports and produce findings, recommended corrections, revised test cases, and focused clarification questions.</p>
+        </div>
+      </div>
+
+      <div class="process-grid">
+        <aside class="panel steps-nav" aria-label="qTest review stages">
+          <button class="review-step-button active" data-review-step="0">
+            <span>Review 1</span>
+            <strong>Read export and context</strong>
+          </button>
+          <button class="review-step-button" data-review-step="1">
+            <span>Review 2</span>
+            <strong>Inventory test cases</strong>
+          </button>
+          <button class="review-step-button" data-review-step="2">
+            <span>Review 3</span>
+            <strong>Check setup and scope</strong>
+          </button>
+          <button class="review-step-button" data-review-step="3">
+            <span>Review 4</span>
+            <strong>Assess test steps</strong>
+          </button>
+          <button class="review-step-button" data-review-step="4">
+            <span>Review 5</span>
+            <strong>Validate results and options</strong>
+          </button>
+          <button class="review-step-button" data-review-step="5">
+            <span>Review 6</span>
+            <strong>Report and revise</strong>
+          </button>
+        </aside>
+
+        <section class="panel diagram-card">
+          <div class="diagram" id="reviewDiagram">
+            <div class="review-node active" data-review-node="0">
+              <div class="num">1</div>
+              <h3>Sources</h3>
+              <p>Read the export and all supplied supporting information.</p>
+            </div>
+            <div class="review-node" data-review-node="1">
+              <div class="num">2</div>
+              <h3>Inventory</h3>
+              <p>Identify every exported test case and business flow.</p>
+            </div>
+            <div class="review-node" data-review-node="2">
+              <div class="num">3</div>
+              <h3>Completeness</h3>
+              <p>Check description, scope, preconditions, users, and data.</p>
+            </div>
+            <div class="review-node" data-review-node="3">
+              <div class="num">4</div>
+              <h3>Execution</h3>
+              <p>Confirm each step gives a reasonable amount of instruction.</p>
+            </div>
+            <div class="review-node" data-review-node="4">
+              <div class="num">5</div>
+              <h3>Results</h3>
+              <p>Check validations, parameters, options, and access variants.</p>
+            </div>
+            <div class="review-node" data-review-node="5">
+              <div class="num">6</div>
+              <h3>Review Output</h3>
+              <p>Present findings first, then revised qTest content.</p>
+            </div>
+          </div>
+
+          <div class="detail-box" id="reviewDetailBox">
+            <h3>Read the export and supporting context</h3>
+            <p>Start with the exported qTest content, then use Jira stories, Markdown process docs, requirements, parameter lists, and other provided sources to understand what the case is intended to test.</p>
+            <ul>
+              <li>Preserve the meaning of the exported test case.</li>
+              <li>Map supporting sources to the cases they affect.</li>
+              <li>Do not invent missing values or behavior.</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <section class="output-grid">
+        <article class="output-card">
+          <h2>Review Quality Gates</h2>
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Area</th>
+                <th>Review Question</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Description</td>
+                <td>Does it explain the purpose, process, scope, starting point, and intended outcome?</td>
+              </tr>
+              <tr>
+                <td>Preconditions</td>
+                <td>Are all necessary accounts, access, records, data, environment, configuration, and prior workflow states documented?</td>
+              </tr>
+              <tr>
+                <td>Test Steps</td>
+                <td>Can another tester follow each step without guessing, while avoiding unnecessary click-by-click detail?</td>
+              </tr>
+              <tr>
+                <td>Validation</td>
+                <td>Does every step verify a concrete and observable result?</td>
+              </tr>
+              <tr>
+                <td>Users and Access</td>
+                <td>Are all roles, login needs, setup differences, and access-management options clear?</td>
+              </tr>
+              <tr>
+                <td>Parameters</td>
+                <td>Does every referenced parameter have values, and is every provided parameter used or called out?</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+
+        <article class="output-card">
+          <h2>Finding Severity</h2>
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th>Severity</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="severity critical">Critical</span></td>
+                <td>The test cannot be executed or its result cannot be determined.</td>
+              </tr>
+              <tr>
+                <td><span class="severity high">High</span></td>
+                <td>Important setup, action, access, parameter, or validation information is missing.</td>
+              </tr>
+              <tr>
+                <td><span class="severity medium">Medium</span></td>
+                <td>The case is executable but contains ambiguity, weak organization, or insufficient detail.</td>
+              </tr>
+              <tr>
+                <td><span class="severity low">Low</span></td>
+                <td>Clarity, consistency, naming, or formatting improvement.</td>
+              </tr>
+            </tbody>
+          </table>
+        </article>
+      </section>
+
+      <section class="output-card" style="margin-top: 22px;">
+        <h2>Required Review Deliverables</h2>
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Deliverable</th>
+              <th>What It Contains</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Review Summary</td>
+              <td>Case count, overall readiness status, and finding counts by severity.</td>
+            </tr>
+            <tr>
+              <td>Test Case Inventory</td>
+              <td>Each exported case, its business flow, review status, and consolidate/keep-separate recommendation.</td>
+            </tr>
+            <tr>
+              <td>Findings</td>
+              <td>Severity, affected case, problem, impact, and recommended correction.</td>
+            </tr>
+            <tr>
+              <td>Step-Level Review</td>
+              <td>Step-specific assessment with recommended action text and expected result.</td>
+            </tr>
+            <tr>
+              <td>Revised qTest Cases</td>
+              <td>Corrected descriptions, necessary preconditions, users/access, parameters, steps, and validations supported by the sources.</td>
+            </tr>
+            <tr>
+              <td>Clarifications</td>
+              <td>Only the unanswered questions required to finish the review without inventing data.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout">
+          <strong>Execution-detail standard:</strong> a step should contain enough instruction for a tester unfamiliar with the process to complete one concrete task without guessing, but it should not fragment a single task into unnecessary click-by-click steps.
+        </div>
+      </section>
+    </section>
+
+    <p class="footer-note">
+      Companion artifact for the <strong>qtest-test-case-converter</strong> guideline and <strong>qTest export review prompt</strong>.
+    </p>
+  </main>
+
+  <script>
+    const stages = [
+      {
+        title: "Read input and background sources",
+        body: "The skill starts by extracting only the facts supplied by the user, including Jira stories, high-level background, existing Markdown process docs, and relevant files from a provided background directory. It does not invent login data, statuses, expected messages, test records, URLs, or application behavior.",
+        bullets: [
+          "Capture Jira fields, actors, actions, pages, forms, records, outcomes, and source locations.",
+          "Inspect relevant background files and Markdown process docs when the user provides them.",
+          "Use acceptance criteria and process documentation to identify testable behavior.",
+          "Separate known facts from assumptions.",
+          "Mark missing required details as Needs clarification."
+        ]
+      },
+      {
+        title: "Detect source test cases",
+        body: "Some inputs contain more than one test case, result output, scenario, or flow. The skill identifies those boundaries before writing qTest content.",
+        bullets: [
+          "Look for separate titles, numbered cases, expected results, roles, preconditions, or flow changes.",
+          "Treat Jira stories, Markdown process docs, and background files as supporting evidence for source case boundaries.",
+          "Preserve source details that affect qTest grouping."
+        ]
+      },
+      {
+        title: "Consolidate or split source cases",
+        body: "The skill tries to group related source cases into one qTest test case when one coherent case can cover them. If not, it creates separate qTest cases for the distinct flows.",
+        bullets: [
+          "Consolidate when cases share the same business objective and differ only by options, roles, data, or parameters.",
+          "Split when cases have different objectives, incompatible preconditions, or mutually exclusive outcomes.",
+          "Include a Source Grouping Decision to explain the choice."
+        ]
+      },
+      {
+        title: "Identify qTest structure",
+        body: "The skill organizes the result into qTest-style sections so the output is ready to transfer into qTest or a qTest import process.",
+        bullets: [
+          "Create a clear test case title and description.",
+          "List source analysis, grouping decision, preconditions, login details, access/setup options, qTest parameters, and test data.",
+          "Build the main qTest step table with Step and Validation columns."
+        ]
+      },
+      {
+        title: "Map options and qTest parameters",
+        body: "When a test can be run with different users, setup steps, access-management choices, workflow paths, or qTest parameter values, the skill shows those choices in option tables.",
+        bullets: [
+          "List every user or role in Login / User Details.",
+          "Create Access / Setup Options for user-specific setup and access-management choices.",
+          "Check provided qTest parameters and values against the draft before finalizing.",
+          "Use tables for parameter values, branches, repeated checks, and process variants."
+        ]
+      },
+      {
+        title: "Build complete steps and ask clarifications",
+        body: "Each step should complete a concrete piece of work and each validation should prove an observable result. After the draft, the skill asks only for missing or ambiguous information that matters.",
+        bullets: [
+          "Prefer page-level, form-level, task-level, or workflow-level completion.",
+          "Verify status, message, field value, created record, assignment, report, or workflow movement.",
+          "Group questions by qTest structure, step process, users/login, test data, validation, or other process.",
+          "Ask whether the Jira story, Markdown process documentation, or another source is authoritative when sources conflict."
+        ]
+      }
+    ];
+
+    const reviewStages = [
+      {
+        title: "Read the export and supporting context",
+        body: "Start with the exported qTest content, then use Jira stories, Markdown process docs, requirements, parameter lists, and other provided sources to understand what each case is intended to test.",
+        bullets: [
+          "Preserve the meaning of the exported test case.",
+          "Map supporting sources to the cases they affect.",
+          "Do not invent missing values or behavior."
+        ]
+      },
+      {
+        title: "Inventory every exported test case",
+        body: "Identify each test case, its business objective, workflow, users, expected outcome, and relationship to other cases before judging quality.",
+        bullets: [
+          "Detect multiple cases even when the export is presented as one large table.",
+          "Record which cases cover the same or different business flows.",
+          "Recommend consolidation only when options or parameters can represent the differences clearly."
+        ]
+      },
+      {
+        title: "Check description, scope, and prerequisites",
+        body: "Confirm the tester understands what is being tested and has everything required to begin and finish the test case.",
+        bullets: [
+          "Require a meaningful description, not a copy of the title.",
+          "Require preconditions only when setup, access, records, data, configuration, or workflow state is necessary.",
+          "Verify every involved user, role, login need, and access-management option."
+        ]
+      },
+      {
+        title: "Assess whether each step is executable",
+        body: "A step needs enough instruction for someone unfamiliar with the process to complete one concrete task without guessing.",
+        bullets: [
+          "Include necessary navigation, inputs, selections, decisions, and submitted values.",
+          "Avoid vague steps such as Complete the form or Process the request.",
+          "Avoid unnecessary click-by-click fragmentation when the clicks form one complete task.",
+          "Use tables for multiple run options, roles, fields, branches, or parameter values."
+        ]
+      },
+      {
+        title: "Validate expected results and run options",
+        body: "Every step must have a concrete observable result, and every parameter or access option must be complete and consistent.",
+        bullets: [
+          "Reject vague results such as Works as expected or Verify success.",
+          "Check statuses, messages, persisted values, records, permissions, notifications, and downstream workflow results.",
+          "Verify parameter names, values, usage, and access/setup variants."
+        ]
+      },
+      {
+        title: "Report findings, then provide revisions",
+        body: "Present the review outcome before rewriting. Correct what the supplied sources support and identify the remaining information that requires a human answer.",
+        bullets: [
+          "Summarize readiness and findings by severity.",
+          "Provide case-level and step-level findings with recommended changes.",
+          "Provide revised qTest test cases where possible.",
+          "Ask categorized clarification questions only for unresolved gaps."
+        ]
+      }
+    ];
+
+    const buttons = document.querySelectorAll(".step-button");
+    const nodes = document.querySelectorAll(".node");
+    const detailBox = document.getElementById("detailBox");
+
+    function renderStage(index) {
+      const stage = stages[index];
+      buttons.forEach((button) => button.classList.toggle("active", Number(button.dataset.step) === index));
+      nodes.forEach((node) => node.classList.toggle("active", Number(node.dataset.node) === index));
+      detailBox.innerHTML = `
+        <h3>${stage.title}</h3>
+        <p>${stage.body}</p>
+        <ul>${stage.bullets.map((item) => `<li>${item}</li>`).join("")}</ul>
+      `;
+    }
+
+    buttons.forEach((button) => {
+      button.addEventListener("click", () => renderStage(Number(button.dataset.step)));
+    });
+
+    nodes.forEach((node) => {
+      node.addEventListener("click", () => renderStage(Number(node.dataset.node)));
+      node.style.cursor = "pointer";
+    });
+
+    const reviewButtons = document.querySelectorAll(".review-step-button");
+    const reviewNodes = document.querySelectorAll(".review-node");
+    const reviewDetailBox = document.getElementById("reviewDetailBox");
+
+    function renderReviewStage(index) {
+      const stage = reviewStages[index];
+      reviewButtons.forEach((button) => button.classList.toggle("active", Number(button.dataset.reviewStep) === index));
+      reviewNodes.forEach((node) => node.classList.toggle("active", Number(node.dataset.reviewNode) === index));
+      reviewDetailBox.innerHTML = `
+        <h3>${stage.title}</h3>
+        <p>${stage.body}</p>
+        <ul>${stage.bullets.map((item) => `<li>${item}</li>`).join("")}</ul>
+      `;
+    }
+
+    reviewButtons.forEach((button) => {
+      button.addEventListener("click", () => renderReviewStage(Number(button.dataset.reviewStep)));
+    });
+
+    reviewNodes.forEach((node) => {
+      node.addEventListener("click", () => renderReviewStage(Number(node.dataset.reviewNode)));
+      node.style.cursor = "pointer";
+    });
+
+    const tabs = document.querySelectorAll(".tab");
+    const tabPanels = document.querySelectorAll(".tab-content");
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const target = tab.dataset.tab;
+        tabs.forEach((item) => item.classList.toggle("active", item === tab));
+        tabPanels.forEach((panel) => panel.classList.toggle("active", panel.id === target));
+      });
+    });
+  </script>
+</body>
+</html>
